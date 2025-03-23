@@ -15,11 +15,14 @@ from collections import deque
 
 # Load the .mat file
 data = scipy.io.loadmat('maze.mat')
-# Extract the map (assuming it's stored under the key 'map')
+# Extract the map 
 maze_map = data['map']
 # Print to verify
-print(maze_map.shape)  # Should match the given 20x14 or other size
-print(maze_map)  # Check the content (0s, 1s, 2)
+print(maze_map.shape) 
+print(maze_map)
+goal_pos = np.argwhere(maze_map == 2)
+print("Goal positions found:", goal_pos)
+
 
 def wavefront_expansion(grid, goal):
     """
@@ -86,6 +89,10 @@ def planner(map, start_row, start_column):
     """
     Computes the optimal trajectory using wavefront planning.
     """
+    
+     # Ensure map is an integer array (fixes potential data type issues)
+    map = map.astype(int)
+    
      # Find the goal position
     goal_pos = np.argwhere(map == 2)  # Find goal (should return an array of indices)
     if goal_pos.size == 0:
@@ -124,8 +131,10 @@ start_row, start_column = 45, 4
 # Run the wavefront planner
 value_map, trajectory = planner(maze_map, start_row, start_column)
 
-# Print results
+# # Print results
 print("Value Map:\n", value_map)
 print("Trajectory:", trajectory)
 plot_map(maze_map, trajectory)
+
+
 
