@@ -9,6 +9,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io
+import time
 from collections import deque
 
 
@@ -18,8 +19,7 @@ data = scipy.io.loadmat('maze.mat')
 # Extract the map 
 maze_map = data['map']
 # Print to verify
-print(maze_map.shape) 
-print(maze_map)
+print("Maze shape:",maze_map.shape) 
 goal_pos = np.argwhere(maze_map == 2)
 print("Goal positions found:", goal_pos)
 
@@ -106,6 +106,9 @@ def planner(map, start_row, start_column):
     # Extract the shortest path
     trajectory = extract_path(value_map, start_row, start_column)
 
+    np.savetxt("value_map.txt", value_map, fmt='%d')
+    np.savetxt("trajectory.txt", trajectory, fmt='%d')
+
     return value_map, trajectory
 
 
@@ -121,6 +124,7 @@ def plot_map(map, trajectory):
         plt.scatter(c, r, color='red')
 
     plt.title("Wavefront Path Planning")
+    plt.savefig("trajectory_map.png")
     plt.show()
 
 
@@ -128,12 +132,16 @@ def plot_map(map, trajectory):
 # Test the planner, Define the start position
 start_row, start_column = 45, 4 
 
+start_time = time.time()
+
 # Run the wavefront planner
 value_map, trajectory = planner(maze_map, start_row, start_column)
 
-# # Print results
-print("Value Map:\n", value_map)
-print("Trajectory:", trajectory)
+end_time = time.time()
+execution_time = end_time - start_time
+
+print("Execution time: {:.6f} seconds".format(execution_time))
+
 plot_map(maze_map, trajectory)
 
 
