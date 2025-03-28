@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io
 import time
+from mazelib.generate.Prims import Prims
 from collections import deque
 
 
@@ -20,8 +21,7 @@ data = scipy.io.loadmat('maze.mat')
 maze_map = data['map']
 # Print to verify
 print("Maze shape:",maze_map.shape) 
-goal_pos = np.argwhere(maze_map == 2)
-print("Goal positions found:", goal_pos)
+
 
 
 def wavefront_expansion(grid, goal):
@@ -89,16 +89,23 @@ def planner(map, start_row, start_column):
     """
     Computes the optimal trajectory using wavefront planning.
     """
-    
-     # Ensure map is an integer array (fixes potential data type issues)
-    map = map.astype(int)
-    
-     # Find the goal position
-    goal_pos = np.argwhere(map == 2)  # Find goal (should return an array of indices)
-    if goal_pos.size == 0:
+
+    # Ensure map is an integer array 
+    map = map.astype(int) 
+
+    # Find the goal position
+    goal_pos = []
+    for r in range(len(map)):  # Iterate over rows
+        for c in range(len(map[0])):  # Iterate over columns
+            if map[r][c] == 2:
+                goal_pos.append((r, c))  # Store (row, col) tuple
+
+    if not goal_pos:  # If goal_pos is empty, no goal is found
         raise ValueError("No goal (2) found in the map!")
     
-    goal_pos = tuple(goal_pos[0])  # Convert to tuple (row, col)
+    goal_pos = goal_pos[0]  # Take the first goal position
+
+    print("Goal positions found:", goal_pos)
 
     # Generate the value map
     value_map = wavefront_expansion(map, goal_pos)
@@ -127,7 +134,32 @@ def plot_map(map, trajectory):
     plt.savefig("trajectory_map.png")
     plt.show()
 
+#  This function is intended for testing and validation purposes only. 
+# It creates a grid-based environment with random obstacles and a randomly placed goal.
 
+# def generate_random_map(rows=30, cols=50, obstacle_ratio=0.2):
+#     """
+#     Generates a random 2D map for wavefront path planning.
+#     """
+#     # Create an empty grid initialized with zeros (free space)
+#     grid = np.zeros((rows, cols), dtype=int)
+#     # Calculate the number of obstacles based on the given ratio
+#     num_obstacles = int(rows * cols * obstacle_ratio)
+
+#     # Place obstacles randomly
+#     obstacle_indices = np.random.choice(rows * cols, num_obstacles, replace=False)
+#     for index in obstacle_indices:
+#         r, c = divmod(index, cols) # Convert linear index to 2D index
+#         grid[r, c] = 1    # Mark cell as an obstacle
+
+#     # Place a goal somewhere not an obstacle
+#     while True:
+#         gr, gc = np.random.randint(0, rows), np.random.randint(0, cols)
+#         if grid[gr, gc] == 0:
+#             grid[gr, gc] = 2  # Mark as goal
+#             break
+
+#     return grid
 
 # Test the planner, Define the start position
 start_row, start_column = 45, 4 
@@ -137,6 +169,19 @@ start_time = time.time()
 # Run the wavefront planner
 value_map, trajectory = planner(maze_map, start_row, start_column)
 
+# Testing 
+
+# # Generate the test map
+# large_map = generate_random_map(40, 80, obstacle_ratio=0.4)
+# # Choose a random start position (not an obstacle or goal)
+# while True:
+#     sr, sc = np.random.randint(0, 30), np.random.randint(0, 50)
+#     if large_map[sr, sc] == 0:
+#         break
+# # Run the planner
+# value_map, trajectory = planner(large_map, sr, sc)
+
+
 end_time = time.time()
 # Calculate execution time
 execution_time = end_time - start_time
@@ -145,5 +190,6 @@ print("Execution time: {:.6f} seconds".format(execution_time))
 
 plot_map(maze_map, trajectory)
 
+# plot_map(large_map, trajectory) #plotting of test map
 
 
