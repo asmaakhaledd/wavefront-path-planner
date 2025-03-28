@@ -29,7 +29,7 @@ def wavefront_expansion(grid, goal):
     Computes the value map using wavefront expansion.
     """
     # Initialize the value map
-    value_map = np.ones_like(grid) * -1
+    value_map = np.copy(grid)
     value_map[goal] = 2
 
     # Initialize the wavefront queue
@@ -47,7 +47,7 @@ def wavefront_expansion(grid, goal):
         for dr, dc in directions:
             nr, nc = current[0] + dr, current[1] + dc
             if 0 <= nr < grid.shape[0] and 0 <= nc < grid.shape[1]:  # Inside grid
-                if grid[nr, nc] == 0 and value_map[nr, nc] == -1:  # Free space and unvisited
+                if grid[nr, nc] == 0 and value_map[nr, nc] == 0:  
                     value_map[nr, nc] = value_map[current] + 1
                     wavefront.append((nr, nc))
 
@@ -138,6 +138,7 @@ start_time = time.time()
 value_map, trajectory = planner(maze_map, start_row, start_column)
 
 end_time = time.time()
+# Calculate execution time
 execution_time = end_time - start_time
 
 print("Execution time: {:.6f} seconds".format(execution_time))
